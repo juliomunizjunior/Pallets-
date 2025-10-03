@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Pallets</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .menu-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .menu-item h3 {
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .menu-item p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-discrepancy {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+
+        .summary-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: inline-block;
+            margin: 0 20px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .summary-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="container">
+        <h1>Sistema de Controle de Pallets</h1>
+        <h2>Selecione seu perfil:</h2>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="login('motorista')">
+                <h3>🚛 Motorista</h3>
+                <p>Registrar saídas e retornos de pallets</p>
+            </div>
+            <div class="menu-item" onclick="login('chefePatio')">
+                <h3>👷 Chefe do Pátio</h3>
+                <p>Confirmar saídas e retornos</p>
+            </div>
+            <div class="menu-item" onclick="login('supervisor')">
+                <h3>👔 Supervisor</h3>
+                <p>Visualizar relatórios</p>
+            </div>
+            <div class="menu-item" onclick="login('admin')">
+                <h3>🔧 Administrador</h3>
+                <p>Gerenciar sistema e relatórios</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Inicial - Motorista -->
+    <div id="motoristaScreen" class="container hidden">
+        <h1>Bem-vindo, Motorista</h1>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showRegistrarSaida()">
+                <h3>📤 Registrar Saída</h3>
+                <p>Registrar saída de pallets</p>
+            </div>
+            <div class="menu-item" onclick="showRegistrarRetorno()">
+                <h3>📥 Registrar Retorno</h3>
+                <p>Registrar retorno de pallets</p>
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <h3>🚪 Sair</h3>
+                <p>Voltar à tela de login</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Inicial - Chefe do Pátio -->
+    <div id="chefePatioScreen" class="container hidden">
+        <h1>Bem-vindo, Chefe do Pátio</h1>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showConfirmarSaida()">
+                <h3>✅ Confirmar Saída</h3>
+                <p>Confirme as saídas registradas</p>
+            </div>
+            <div class="menu-item" onclick="showConfirmarRetorno()">
+                <h3>🔄 Confirmar Retorno</h3>
+                <p>Confirme os retornos registrados</p>
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <h3>🚪 Sair</h3>
+                <p>Voltar à tela de login</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela Inicial - Admin/Supervisor -->
+    <div id="adminScreen" class="container hidden">
+        <h1>Painel Administrativo</h1>
+        <div class="menu-grid">
+            <div class="menu-item" onclick="showRelatorios()">
+                <h3>📊 Relatórios</h3>
+                <p>Visualizar relatórios completos</p>
+            </div>
+            <div class="menu-item" onclick="showEstoque()">
+                <h3>📦 Estoque</h3>
+                <p>Ver estoque atual</p>
+            </div>
+            <div class="menu-item" onclick="showDivergencias()">
+                <h3>⚠️ Divergências</h3>
+                <p>Verificar divergências</p>
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <h3>🚪 Sair</h3>
+                <p>Voltar à tela de login</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário Registrar Saída -->
+    <div id="registrarSaidaScreen" class="container hidden">
+        <h1>Registrar Saída de Pallets</h1>
+        <form id="formRegistrarSaida">
+            <div class="form-group">
+                <label for="clienteSaida">Cliente:</label>
+                <input type="text" id="clienteSaida" required>
+            </div>
+            <div class="form-group">
+                <label for="produtoSaida">Produto:</label>
+                <select id="produtoSaida" required>
+                    <option value="">Selecione o produto</option>
+                    <option value="Tijolos">Tijolos</option>
+                    <option value="Telhas">Telhas</option>
+                    <option value="Blocos">Blocos</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantidadeSaida">Quantidade (pallets):</label>
+                <input type="number" id="quantidadeSaida" min="1" required>
+            </div>
+            <button type="submit">Enviar Registro</button>
+            <button type="button" onclick="voltarMotorista()">Voltar</button>
+        </form>
+    </div>
+
+    <!-- Formulário Registrar Retorno -->
+    <div id="registrarRetornoScreen" class="container hidden">
+        <h1>Registrar Retorno de Pallets</h1>
+        <form id="formRegistrarRetorno">
+            <div class="form-group">
+                <label for="clienteRetorno">Cliente:</label>
+                <input type="text" id="clienteRetorno" required>
+            </div>
+            <div class="form-group">
+                <label for="produtoRetorno">Produto:</label>
+                <select id="produtoRetorno" required>
+                    <option value="">Selecione o produto</option>
+                    <option value="Tijolos">Tijolos</option>
+                    <option value="Telhas">Telhas</option>
+                    <option value="Blocos">Blocos</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantidadeRetorno">Quantidade (pallets):</label>
+                <input type="number" id="quantidadeRetorno" min="1" required>
+            </div>
+            <button type="submit">Enviar Registro</button>
+            <button type="button" onclick="voltarMotorista()">Voltar</button>
+        </form>
+    </div>
+
+    <!-- Tela Confirmar Saída -->
+    <div id="confirmarSaidaScreen" class="container hidden">
+        <h1>Confirmar Saída de Pallets</h1>
+        <div id="listaSaidasPendentes"></div>
+        <button onclick="voltarChefePatio()">Voltar</button>
+    </div>
+
+    <!-- Tela Confirmar Retorno -->
+    <div id="confirmarRetornoScreen" class="container hidden">
+        <h1>Confirmar Retorno de Pallets</h1>
+        <div id="listaRetornosPendentes"></div>
+        <button onclick="voltarChefePatio()">Voltar</button>
+    </div>
+
+    <!-- Tela de Relatórios -->
+    <div id="relatoriosScreen" class="container hidden">
+        <h1>Relatórios de Movimentação</h1>
+        
+        <div class="filter-section">
+            <h3>Filtros</h3>
+            <div class="filter-group">
+                <label for="filtroCliente">Cliente:</label>
+                <input type="text" id="filtroCliente" placeholder="Nome do cliente">
+            </div>
+            <div class="filter-group">
+                <label for="filtroProduto">Produto:</label>
+                <select id="filtroProduto">
+                    <option value="">Todos</option>
+                    <option value="Tijolos">Tijolos</option>
+                    <option value="Telhas">Telhas</option>
+                    <option value="Blocos">Blocos</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filtroDataInicio">Data Início:</label>
+                <input type="date" id="filtroDataInicio">
+            </div>
+            <div class="filter-group">
+                <label for="filtroDataFim">Data Fim:</label>
+                <input type="date" id="filtroDataFim">
+            </div>
+            <button onclick="aplicarFiltros()">Aplicar Filtros</button>
+            <button onclick="limparFiltros()">Limpar Filtros</button>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-item">
+                <div class="summary-value" id="totalEnviado">0</div>
+                <div class="summary-label">Total Enviado</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="totalRetornado">0</div>
+                <div class="summary-label">Total Retornado</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value" id="totalFaltando">0</div>
+                <div class="summary-label">Total Faltando</div>
+            </div>
+        </div>
+
+        <table id="tabelaRelatorios">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Cliente</th>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                    <th>Diferença</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaRelatorios">
+            </tbody>
+        </table>
+        <button onclick="voltarAdmin()">Voltar</button>
+    </div>
+
+    <!-- Tela de Estoque -->
+    <div id="estoqueScreen" class="container hidden">
+        <h1>Estoque de Pallets</h1>
+        <div id="mensagemEstoque"></div>
+        <table id="tabelaEstoque">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Produto</th>
+                    <th>Total Enviado</th>
+                    <th>Total Retornado</th>
+                    <th>Saldo Pendente</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaEstoque">
+            </tbody>
+        </table>
+        <button onclick="voltarAdmin()">Voltar</button>
+    </div>
+
+    <!-- Tela de Divergências -->
+    <div id="divergenciasScreen" class="container hidden">
+        <h1>Divergências Encontradas</h1>
+        <div id="listaDivergencias"></div>
+        <button onclick="voltarAdmin()">Voltar</button>
+    </div>
+
+    <script>
+        // Estrutura de dados para armazenar as movimentações
+        let movimentacoes = [];
+        let usuarioAtual = null;
+
+        // Função de login
+        function login(perfil) {
+            usuarioAtual = perfil;
+            document.getElementById('loginScreen').classList.add('hidden');
+            
+            switch(perfil) {
+                case 'motorista':
+                    document.getElementById('motoristaScreen').classList.remove('hidden');
+                    break;
+                case 'chefePatio':
+                    document.getElementById('chefePatioScreen').classList.remove('hidden');
+                    break;
+                case 'supervisor':
+                case 'admin':
+                    document.getElementById('adminScreen').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            usuarioAtual = null;
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // Funções de navegação para Motorista
+        function showRegistrarSaida() {
+            document.getElementById('motoristaScreen').classList.add('hidden');
+            document.getElementById('registrarSaidaScreen').classList.remove('hidden');
+        }
+
+        function showRegistrarRetorno() {
+            document.getElementById('motoristaScreen').classList.add('hidden');
+            document.getElementById('registrarRetornoScreen').classList.remove('hidden');
+        }
+
+        function voltarMotorista() {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('motoristaScreen').classList.remove('hidden');
+        }
+
+        // Funções de navegação para Chefe do Pátio
+        function showConfirmarSaida() {
+            document.getElementById('chefePatioScreen').classList.add('hidden');
+            document.getElementById('confirmarSaidaScreen').classList.remove('hidden');
+            carregarSaidasPendentes();
+        }
+
+        function showConfirmarRetorno() {
+            document.getElementById('chefePatioScreen').classList.add('hidden');
+            document.getElementById('confirmarRetornoScreen').classList.remove('hidden');
+            carregarRetornosPendentes();
+        }
+
+        function voltarChefePatio() {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('chefePatioScreen').classList.remove('hidden');
+        }
+
+        // Funções de navegação para Admin/Supervisor
+        function showRelatorios() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('relatoriosScreen').classList.remove('hidden');
+            carregarRelatorios();
+        }
+
+        function showEstoque() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('estoqueScreen').classList.remove('hidden');
+            carregarEstoque();
+        }
+
+        function showDivergencias() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('divergenciasScreen').classList.remove('hidden');
+            carregarDivergencias();
+        }
+
+        function voltarAdmin() {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('adminScreen').classList.remove('hidden');
+        }
+
+        // Formulário de Registro de Saída
+        document.getElementById('formRegistrarSaida').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const movimentacao = {
+                id: Date.now(),
+                tipo: 'saída',
+                cliente: document.getElementById('clienteSaida').value,
+                produto: document.getElementById('produtoSaida').value,
+                quantidade: parseInt(document.getElementById('quantidadeSaida').value),
+                dataHora: new Date().toLocaleString('pt-BR'),
+                status: 'pendente',
+                quantidadeConfirmada: null,
+                diferenca: null
+            };
+            
+            movimentacoes.push(movimentacao);
+            
+            alert('Saída registrada com sucesso! Aguardando confirmação do chefe do pátio.');
+            document.getElementById('formRegistrarSaida').reset();
+            voltarMotorista();
+        });
+
+        // Formulário de Registro de Retorno
+        document.getElementById('formRegistrarRetorno').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const movimentacao = {
+                id: Date.now(),
+                tipo: 'retorno',
+                cliente: document.getElementById('clienteRetorno').value,
+                produto: document.getElementById('produtoRetorno').value,
+                quantidade: parseInt(document.getElementById('quantidadeRetorno').value),
+                dataHora: new Date().toLocaleString('pt-BR'),
+                status: 'pendente',
+                quantidadeConfirmada: null,
+                diferenca: null
+            };
+            
+            movimentacoes.push(movimentacao);
+            
+            alert('Retorno registrado com sucesso! Aguardando confirmação do chefe do pátio.');
+            document.getElementById('formRegistrarRetorno').reset();
+            voltarMotorista();
+        });
+
+        // Carregar saídas pendentes para confirmação
+        function carregarSaidasPendentes() {
+            const saidasPendentes = movimentacoes.filter(m => m.tipo === 'saída' && m.status === 'pendente');
+            const container = document.getElementById('listaSaidasPendentes');
+            
+            if (saidasPendentes.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">Nenhuma saída pendente de confirmação.</div>';
+                return;
+            }
+            
+            let html = '';
+            saidasPendentes.forEach(saida => {
+                html += `
+                    <div class="summary-card">
+                        <h3>Saída #${saida.id}</h3>
+                        <p><strong>Cliente:</strong> ${saida.cliente}</p>
+                        <p><strong>Produto:</strong> ${saida.produto}</p>
+                        <p><strong>Quantidade:</strong> ${saida.quantidade} pallets</p>
+                        <p><strong>Data/Hora:</strong> ${saida.dataHora}</p>
+                        <div style="margin-top: 15px;">
+                            <label for="confirmQuantidade${saida.id}">Quantidade confirmada:</label>
+                            <input type="number" id="confirmQuantidade${saida.id}" value="${saida.quantidade}" min="0">
+                            <button class="btn-success" onclick="confirmarSaida(${saida.id})">Confirmar</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Carregar retornos pendentes para confirmação
+        function carregarRetornosPendentes() {
+            const retornosPendentes = movimentacoes.filter(m => m.tipo === 'retorno' && m.status === 'pendente');
+            const container = document.getElementById('listaRetornosPendentes');
+            
+            if (retornosPendentes.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">Nenhum retorno pendente de confirmação.</div>';
+                return;
+            }
+            
+            let html = '';
+            retornosPendentes.forEach(retorno => {
+                // Calcular quantidade que foi enviada anteriormente para este cliente/produto
+                const totalEnviado = calcularTotalEnviado(retorno.cliente, retorno.produto);
+                const totalRetornadoAnterior = calcularTotalRetornado(retorno.cliente, retorno.produto);
+                const saldoAnterior = totalEnviado - totalRetornadoAnterior;
+                
+                html += `
+                    <div class="summary-card">
+                        <h3>Retorno #${retorno.id}</h3>
+                        <p><strong>Cliente:</strong> ${retorno.cliente}</p>
+                        <p><strong>Produto:</strong> ${retorno.produto}</p>
+                        <p><strong>Quantidade informada:</strong> ${retorno.quantidade} pallets</p>
+                        <p><strong>Data/Hora:</strong> ${retorno.dataHora}</p>
+                        <p><strong>Saldo anterior:</strong> ${saldoAnterior} pallets</p>
+                        <div style="margin-top: 15px;">
+                            <label for="confirmQuantidadeRetorno${retorno.id}">Quantidade confirmada:</label>
+                            <input type="number" id="confirmQuantidadeRetorno${retorno.id}" value="${retorno.quantidade}" min="0">
+                            <button class="btn-success" onclick="confirmarRetorno(${retorno.id})">Confirmar</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Calcular total enviado para um cliente/produto
+        function calcularTotalEnviado(cliente, produto) {
+            const envios = movimentacoes.filter(m => 
+                m.tipo === 'saída' && 
+                m.status === 'confirmado' && 
+                m.cliente === cliente && 
+                m.produto === produto
+            );
+            return envios.reduce((total, m) => total + m.quantidadeConfirmada, 0);
+        }
+
+        // Calcular total retornado para um cliente/produto
+        function calcularTotalRetornado(cliente, produto) {
+            const retornos = movimentacoes.filter(m => 
+                m.tipo === 'retorno' && 
+                m.status === 'confirmado' && 
+                m.cliente === cliente && 
+                m.produto === produto
+            );
+            return retornos.reduce((total, m) => total + m.quantidadeConfirmada, 0);
+        }
+
+        // Confirmar saída
+        function confirmarSaida(id) {
+            const movimentacao = movimentacoes.find(m => m.id === id);
+            const quantidadeConfirmada = parseInt(document.getElementById(`confirmQuantidade${id}`).value);
+            
+            movimentacao.status = 'confirmado';
+            movimentacao.quantidadeConfirmada = quantidadeConfirmada;
+            movimentacao.diferenca = quantidademotoristaScreen').classList.add('hidden');
+            document.getElementById('registrarRetornoScreen').classList.remove('hidden');
+        }
+
+        function voltarMotorista() {
+            document.getElementById('registrarSaidaScreen').classList.add('hidden');
+            document.getElementById('registrarRetornoScreen').classList.add('hidden');
+            document.getElementById('motoristaScreen').classList.remove('hidden');
+        }
+
+        // Funções de navegação para Chefe do Pátio
+        function showConfirmarSaida() {
+            document.getElementById('chefePatioScreen').classList.add('hidden');
+            document.getElementById('confirmarSaidaScreen').classList.remove('hidden');
+            carregarSaidasPendentes();
+        }
+
+        function showConfirmarRetorno() {
+            document.getElementById('chefePatioScreen').classList.add('hidden');
+            document.getElementById('confirmarRetornoScreen').classList.remove('hidden');
+            carregarRetornosPendentes();
+        }
+
+        function voltarChefePatio() {
+            document.getElementById('confirmarSaidaScreen').classList.add('hidden');
+            document.getElementById('confirmarRetornoScreen').classList.add('hidden');
+            document.getElementById('chefePatioScreen').classList.remove('hidden');
+        }
+
+        // Funções de navegação para Admin/Supervisor
+        function showRelatorios() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('relatoriosScreen').classList.remove('hidden');
+            carregarRelatorios();
+        }
+
+        function showEstoque() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('estoqueScreen').classList.remove('hidden');
+            carregarEstoque();
+        }
+
+        function showDivergencias() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('divergenciasScreen').classList.remove('hidden');
+            carregarDivergencias();
+        }
+
+        function voltarAdmin() {
+            document.getElementById('relatoriosScreen').classList.add('hidden');
+            document.getElementById('estoqueScreen').classList.add('hidden');
+            document.getElementById('divergenciasScreen').classList.add('hidden');
+            document.getElementById('adminScreen').classList.remove('hidden');
+        }
+
+        // Formulário Registrar Saída
+        document.getElementById('formRegistrarSaida').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const movimentacao = {
+                id: Date.now(),
+                tipo: 'saída',
+                cliente: document.getElementById('clienteSaida').value,
+                produto: document.getElementById('produtoSaida').value,
+                quantidade: parseInt(document.getElementById('quantidadeSaida').value),
+                quantidadeConfirmada: null,
+                status: 'pendente',
+                dataHora: new Date().toLocaleString('pt-BR'),
+                divergencia: null
+            };
+            
+            movimentacoes.push(movimentacao);
+            alert('Saída registrada com sucesso! Aguardando confirmação do Chefe do Pátio.');
+            document.getElementById('formRegistrarSaida').reset();
+            voltarMotorista();
+        });
+
+        // Formulário Registrar Retorno
+        document.getElementById('formRegistrarRetorno').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const movimentacao = {
+                id: Date.now(),
+                tipo: 'retorno',
+                cliente: document.getElementById('clienteRetorno').value,
+                produto: document.getElementById('produtoRetorno').value,
+                quantidade: parseInt(document.getElementById('quantidadeRetorno').value),
+                quantidadeConfirmada: null,
+                status: 'pendente',
+                dataHora: new Date().toLocaleString('pt-BR'),
+                divergencia: null
+            };
+            
+            movimentacoes.push(movimentacao);
+            alert('Retorno registrado com sucesso! Aguardando confirmação do Chefe do Pátio.');
+            document.getElementById('formRegistrarRetorno').reset();
+            voltarMotorista();
+        });
+
+        // Carregar saídas pendentes para o Chefe do Pátio
+        function carregarSaidasPendentes() {
+            const saidasPendentes = movimentacoes.filter(m => m.tipo === 'saída' && m.status === 'pendente');
+            const container = document.getElementById('listaSaidasPendentes');
+            
+            if (saidasPendentes.length === 0) {
+                container.innerHTML = '<p>Nenhuma saída pendente para confirmar.</p>';
+                return;
+            }
+            
+            container.innerHTML = saidasPendentes.map(mov => `
+                <div class="confirm-card">
+                    <h3>Saída Registrada</h3>
+                    <p><strong>Data/Hora:</strong> ${mov.dataHora}</p>
+                    <p><strong>Cliente:</strong> ${mov.cliente}</p>
+                    <p><strong>Produto:</strong> ${mov.produto}</p>
+                    <p><strong>Quantidade:</strong> ${mov.quantidade} pallets</p>
+                    <div class="confirm-actions">
+                        <input type="number" id="confirm_${mov.id}" value="${mov.quantidade}" min="0">
+                        <button onclick="confirmarSaida(${mov.id})">Confirmar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Carregar retornos pendentes para o Chefe do Pátio
+        function carregarRetornosPendentes() {
+            const retornosPendentes = movimentacoes.filter(m => m.tipo === 'retorno' && m.status === 'pendente');
+            const container = document.getElementById('listaRetornosPendentes');
+            
+            if (retornosPendentes.length === 0) {
+                container.innerHTML = '<p>Nenhum retorno pendente para confirmar.</p>';
+                return;
+            }
+            
+            container.innerHTML = retornosPendentes.map(mov => `
+                <div class="confirm-card">
+                    <h3>Retorno Registrado</h3>
+                    <p><strong>Data/Hora:</strong> ${mov.dataHora}</p>
+                    <p><strong>Cliente:</strong> ${mov.cliente}</p>
+                    <p><strong>Produto:</strong> ${mov.produto}</p>
+                    <p><strong>Quantidade:</strong> ${mov.quantidade} pallets</p>
+                    <div class="confirm-actions">
+                        <input type="number" id="confirm_${mov.id}" value="${mov.quantidade}" min="0">
+                        <button onclick="confirmarRetorno(${mov.id})">Confirmar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Confirmar saída
+        function confirmarSaida(id) {
+            const movimentacao = movimentacoes.find(m => m.id === id);
+            const quantidadeConfirmada = parseInt(document.getElementById(`confirm_${id}`).value);
+            
+            movimentacao.quantidadeConfirmada = quantidadeConfirmada;
+            movimentacao.status = 'confirmada';
+            
+            if (quantidadeConfirmada !== movimentacao.quantidade) {
+                movimentacao.divergencia = quantidadeConfirmada - movimentacao.quantidade;
+            }
+            
+            alert(`Saída confirmada! ${movimentacao.divergencia ? `Divergência de ${movimentacao.divergencia} pallets.` : ''}`);
+            carregarSaidasPendentes();
+        }
+
+        // Confirmar retorno
+        function confirmarRetorno(id) {
+            const movimentacao = movimentacoes.find(m => m.id === id);
+            const quantidadeConfirmada = parseInt(document.getElementById(`confirm_${id}`).value);
+            
+            movimentacao.quantidadeConfirmada = quantidadeConfirmada;
+            movimentacao.status = 'confirmada';
+            
+            if (quantidadeConfirmada !== movimentacao.quantidade) {
+                movimentacao.divergencia = quantidadeConfirmada - movimentacao.quantidade;
+            }
+            
+            // Calcular diferença em relação às saídas
+            const saidasCliente = movimentacoes.filter(m => 
+                m.cliente === movimentacao.cliente && 
+                m.produto === movimentacao.produto && 
+                m.tipo === 'saída' && 
+                m.status === 'confirmada'
+            );
+            
+            const totalSaidas = saidasCliente.reduce((sum, m) => sum + m.quantidadeConfirmada, 0);
+            const retornosCliente = movimentacoes.filter(m => 
+                m.cliente === movimentacao.cliente && 
+                m.produto === movimentacao.produto && 
+                m.tipo === 'retorno' && 
+                m.status === 'confirmada'
+            );
+            const totalRetornos = retornosCliente.reduce((sum, m) => sum + m.quantidadeConfirmada, 0);
+            
+            const faltando = totalSaidas - totalRetornos;
+            
+            alert(`Retorno confirmado! ${movimentacao.divergencia ? `Divergência de ${movimentacao.divergencia} pallets.` : ''} Total faltando: ${faltando} pallets de ${movimentacao.produto}`);
+            carregarRetornosPendentes();
+        }
+
+        // Carregar relatórios
+        function carregarRelatorios() {
+            const tbody = document.getElementById('corpoTabelaRelatorios');
+            const movimentacoesFiltradas = filtrarMovimentacoes();
+            
+            let totalEnviado = 0;
+            let totalRetornado = 0;
+            
+            tbody.innerHTML = movimentacoesFiltradas.map(mov => {
+                if (mov.tipo === 'saída' && mov.status === 'confirmada') {
+                    totalEnviado += mov.quantidadeConfirmada;
+                } else if (mov.tipo === 'retorno' && mov.status === 'confirmada') {
+                    totalRetornado += mov.quantidadeConfirmada;
+                }
+                
+                return `
+                    <tr>
+                        <td>${mov.dataHora}</td>
+                        <td>${mov.cliente}</td>
+                        <td>${mov.produto}</td>
+                        <td>${mov.tipo}</td>
+                        <td>${mov.quantidadeConfirmada || mov.quantidade}</td>
+                        <td>${mov.status === 'confirmada' ? '✅' : '⏳'}</td>
+                        <td>${mov.divergencia ? (mov.divergencia > 0 ? `+${mov.divergencia}` : mov.divergencia) : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('totalEnviado').textContent = totalEnviado;
+            document.getElementById('totalRetornado').textContent = totalRetornado;
+            document.getElementById('totalFaltando').textContent = totalEnviado - totalRetornado;
+        }
+
+        // Filtrar movimentações
+        function filtrarMovimentacoes() {
+            const cliente = document.getElementById('filtroCliente').value.toLowerCase();
+            const produto = document.getElementById('filtroProduto').value;
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+            
+            return movimentacoes.filter(mov => {
+                const dataMov = new Date(mov.dataHora.split('/').reverse().join('-'));
+                const dataInicioObj = dataInicio ? new Date(dataInicio) : null;
+                const dataFimObj = dataFim ? new Date(dataFim) : null;
+                
+                return (!cliente || mov.cliente.toLowerCase().includes(cliente)) &&
+                       (!produto || mov.produto === produto) &&
+                       (!dataInicioObj || dataMov >= dataInicioObj) &&
+                       (!dataFimObj || dataMov <= dataFimObj);
+            });
+        }
+
+        function aplicarFiltros() {
+            carregarRelatorios();
+        }
+
+        function limparFiltros() {
+            document.getElementById('filtroCliente').value = '';
+            document.getElementById('filtroProduto').value = '';
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            carregarRelatorios();
+        }
+
+        // Carregar estoque
+        function carregarEstoque() {
+            const estoque = {};
+            const tbody = document.getElementById('corpoTabelaEstoque');
+            
+            // Processar todas as movimentações confirmadas
+            movimentacoes.filter(m => m.status === 'confirmada').forEach(mov => {
+                const key = `${mov.cliente}-${mov.produto}`;
+                
+                if (!estoque[key]) {
+                    estoque[key] = {
+                        cliente: mov.cliente,
+                        produto: mov.produto,
+                        totalEnviado: 0,
+                        totalRetornado: 0
+                    };
+                }
+                
+                if (mov.tipo === 'saída') {
+                    estoque[key].totalEnviado += mov.quantidadeConfirmada;
+                } else if (mov.tipo === 'retorno') {
+                    estoque[key].totalRetornado += mov.quantidadeConfirmada;
+                }
+            });
+            
+            tbody.innerHTML = Object.values(estoque).map(item => `
+                <tr>
+                    <td>${item.cliente}</td>
+                    <td>${item.produto}</td>
+                    <td>${item.totalEnviado}</td>
+                    <td>${item.totalRetornado}</td>
+                    <td>${item.totalEnviado - item.totalRetornado}</td>
+                </tr>
+            `).join('');
+            
+            // Mensagem de estoque
+            const mensagem = document.getElementById('mensagemEstoque');
+            const totalPendentes = Object.values(estoque).reduce((sum, item) => sum + (item.totalEnviado - item.totalRetornado), 0);
+            mensagem.innerHTML = `<p class="info-message">Total de pallets pendentes de retorno: <strong>${totalPendentes}</strong></p>`;
+        }
+
+        // Carregar divergências
+        function carregarDivergencias() {
+            const divergencias = movimentacoes.filter(m => m.divergencia !== null && m.status === 'confirmada');
+            const container = document.getElementById('listaDivergencias');
+            
+            if (divergencias.length === 0) {
+                container.innerHTML = '<p>Nenhuma divergência encontrada.</p>';
+                return;
+            }
+            
+            container.innerHTML = divergencias.map(mov => `
+                <div class="divergencia-card">
+                    <h3>${mov.tipo === 'saída' ? 'Saída' : 'Retorno'} - ${mov.cliente}</h3>
+                    <p><strong>Data:</strong> ${mov.dataHora}</p>
+                    <p><strong>Produto:</strong> ${mov.produto}</p>
+                    <p><strong>Quantidade registrada:</strong> ${mov.quantidade} pallets</p>
+                    <p><strong>Quantidade confirmada:</strong> ${mov.quantidadeConfirmada} pallets</p>
+                    <p><strong>Divergência:</strong> ${mov.divergencia > 0 ? `+${mov.divergencia}` : mov.divergencia} pallets</p>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+					</html>
